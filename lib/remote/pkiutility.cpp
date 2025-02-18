@@ -7,7 +7,6 @@
 #include "base/logger.hpp"
 #include "base/application.hpp"
 #include "base/tcpsocket.hpp"
-#include "base/tlsutility.hpp"
 #include "base/console.hpp"
 #include "base/tlsstream.hpp"
 #include "base/tcpsocket.hpp"
@@ -53,7 +52,7 @@ int PkiUtility::NewCert(const String& cn, const String& keyfile, const String& c
 	return 0;
 }
 
-int PkiUtility::SignCsr(const String& csrfile, const String& certfile)
+int PkiUtility::SignCsr(const String& csrfile, const String& certfile, long validFor)
 {
 	char errbuf[256];
 
