@@ -99,9 +99,12 @@ public:
 	const Expression::Ptr& GetFilter();
 
 	void Push(Dictionary::Ptr event);
-	Dictionary::Ptr Shift(boost::asio::yield_context yc, double timeout = 5);
+	void Discard(boost::asio::yield_context& yc);
+	Dictionary::Ptr Shift(boost::asio::yield_context& yc, double timeout = 5);
 
 private:
+	std::unique_lock<std::mutex> AsyncLock(boost::asio::yield_context& yc);
+
 	struct Filter
 	{
 		std::size_t Refs;
@@ -114,6 +117,7 @@ private:
 	std::mutex m_Mutex;
 	decltype(m_Filters.begin()) m_Filter;
 	std::queue<Dictionary::Ptr> m_Queue;
+	Atomic<bool> m_Discarded{false}; // Set when Discard() is called, so that Shift() can return nullptr instead of blocking indefinitely.
 	boost::asio::deadline_timer m_Timer;
 };
 
