@@ -103,8 +103,8 @@ public:
 #endif /* _WIN32 */
 	}
 
-	template <typename Handler, typename Function>
-	static void SpawnCoroutine(Handler& h, Function f) {
+	template <typename Executor, typename Function>
+	static void SpawnCoroutine(Executor&& e, Function f) {
 		auto wrapper = [f = std::move(f)](boost::asio::yield_context yc) {
 			try {
 				f(yc);
@@ -123,13 +123,14 @@ public:
 		};
 
 #if BOOST_VERSION >= 108700
-		boost::asio::spawn(h,
+		boost::asio::spawn(
+			std::forward<Executor>(e),
 			std::allocator_arg, boost::context::fixedsize_stack(GetCoroutineStackSize()),
 			std::move(wrapper),
 			boost::asio::detached
 		);
 #else // BOOST_VERSION >= 108700
-		boost::asio::spawn(h, std::move(wrapper), boost::coroutines::attributes(GetCoroutineStackSize()));
+		boost::asio::spawn(std::forward<Executor>(e), std::move(wrapper), boost::coroutines::attributes(GetCoroutineStackSize()));
 #endif // BOOST_VERSION >= 108700
 	}
 
