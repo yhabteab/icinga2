@@ -136,8 +136,13 @@ std::map<String, EventsInbox::Filter> EventsInbox::m_Filters ({{"", EventsInbox:
 EventsRouter EventsRouter::m_Instance;
 
 EventsInbox::EventsInbox(String filter, const String& filterSource)
-	: m_Timer(IoEngine::Get().GetIoContext(), boost::posix_time::neg_infin)
+	: m_Timer(IoEngine::Get().GetIoContext())
 {
+	// Initialize the timer to a negative infinity state, so that the first call to Shift() doesn't block
+	// until an event is pushed into the inbox in its first AsyncLock() invocation. This is necessary because
+	// we want Shift() to wait for events only on a proper timeout, which by default is 5 seconds.
+	m_Timer.expires_at(boost::posix_time::neg_infin);
+
 	std::unique_lock<std::mutex> lock (m_FiltersMutex);
 	m_Filter = m_Filters.find(filter);
 

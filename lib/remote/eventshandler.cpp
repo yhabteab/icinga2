@@ -100,19 +100,52 @@ bool EventsHandler::HandleRequest(
 	response.set(http::field::content_type, "application/json");
 	response.StartStreaming();
 
+	/**
+	 * We don't want to keep the connection alive once we return from this handler, as the client
+	 * is expected to be gone at that point. Otherwise, this will cause a "broken pipe" error in
+	 * the HttpServerConnection class when it tries to read from the stream again.
+	 */
+	request.keep_alive(false);
+
 	IoBoundWorkSlot dontLockTheIoThread (yc);
 
 	auto writer = std::make_shared<BeastHttpMessageAdapter<HttpResponse>>(response);
 	JsonEncoder encoder(writer);
 
+	/**
+	 * Start a watchdog coroutine that will read from the hijacked stream until the client disconnects.
+	 * Though, the read op should block like forever, since we don't expect the client to send any data
+	 * at this point, it's just a way to keep track of the client liveness. Once the client disconnects,
+	 * the read operation will complete with an error, and we can safely discard the inbox and stop processing events.
+	 *
+	 * This will ensure that the Shift operation below doesn't unnecessarily wait for events that are never going
+	 * to be sent, and allows the HttpServerConnection to gracefully handle the disconnection.
+	 *
+	 * @note This coroutine is spawned on the very same executor used by the coroutine from which this handler is
+	 * called (HttpServerConnection#m_IoStrand = yc.get_executor()), so we can safely perform I/O ops on the stream.
+	 */
+	IoEngine::SpawnCoroutine(yc.get_executor(), [inbox = subscriber.GetInbox(), &response](asio::yield_context yc) {
+		char buf[128];
+		asio::mutable_buffer readBuf(buf, 128);
+		boost::system::error_code ec;
+
+		const auto& stream(response.HijackStream());
+		do {
+			stream->async_read_some(readBuf, yc[ec]);
+		} while (!ec);
+
+		response.SetClientAlive(false);
+		inbox->Discard(yc);
+	});
+
 	for (;;) {
 		auto event(subscriber.GetInbox()->Shift(yc));
 
-		if (event && response.IsWritable()) {
+		if (event) {
 			encoder.Encode(event);
 			response.body() << '\n';
 			response.Write(yc);
-		} else {
+		} else if (!response.IsWritable()) {
 			return true;
 		}
 	}

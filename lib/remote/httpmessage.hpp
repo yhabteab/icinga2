@@ -286,7 +286,7 @@ public:
 	 */
 	void Write(boost::asio::yield_context yc);
 
-	bool IsWritable() const { return m_Stream->lowest_layer().is_open(); }
+	bool IsWritable() const { return m_Stream->lowest_layer().is_open() && m_ClientAlive; }
 
 	/**
 	 * Resets the serializer of this message, so that it can be changed and written again.
@@ -298,6 +298,16 @@ public:
 	 */
 	void StartStreaming();
 
+	const Shared<AsioTlsStream>::Ptr& HijackStream() const
+	{
+		return m_Stream;
+	}
+
+	void SetClientAlive(bool alive)
+	{
+		m_ClientAlive.store(alive);
+	}
+
 	void SendJsonBody(const Value& val, bool pretty = false);
 	void SendJsonError(const int code, String info = String(), String diagInfo = String(),
 		bool pretty = false, bool verbose = false);
@@ -308,6 +318,7 @@ private:
 	using Serializer = boost::beast::http::response_serializer<HttpResponse::body_type>;
 	std::unique_ptr<Serializer> m_Serializer{new Serializer{*this}};
 	bool m_HeaderDone = false;
+	Atomic<bool> m_ClientAlive{true};
 
 	Shared<AsioTlsStream>::Ptr m_Stream;
 };
