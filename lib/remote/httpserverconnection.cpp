@@ -482,6 +482,7 @@ void HttpServerConnection::ProcessMessages(boost::asio::yield_context yc)
 			m_Seen = std::numeric_limits<decltype(m_Seen)>::max();
 			m_Reading = false;
 
+			Log(LogInformation, "HttpServerConnection") << "Processing Request.";
 			if (!ProcessRequest(request, response, m_WaitGroup, cpuBoundWorkTime, yc)) {
 				break;
 			}
@@ -533,20 +534,32 @@ void HttpServerConnection::DetectClientShutdown(boost::asio::yield_context yc)
 
 	while (!m_ShuttingDown) {
 		Defer setCanRead{ [this]() { m_CanRead.Set(); } };
+		Log(LogInformation, "HttpServerConnection") << "Waiting for readable bytes.";
 
 		boost::system::error_code ec;
 		m_Stream->lowest_layer().async_wait(wait_type::wait_read, yc[ec]);
 
+		Log(LogInformation, "HttpServerConnection") << "Readable bytes.";
 		if (m_Reading || m_ShuttingDown) {
 			continue;
 		}
+		Log(LogInformation, "HttpServerConnection") << "Starting Fill.";
 
 		m_CanRead.Clear();
 
-		char c;
 		m_Stream->async_fill(yc[ec]);
 		if (ec) {
-			Log(LogInformation, "HttpServerConnection") << "Detected shutdown from client: " << m_PeerAddress << ".";
+			Log(LogInformation, "HttpServerConnection") << "Detected shutdown from client: " << m_PeerAddress << ". Fill ec: " << ec.message();
+			Disconnect(yc);
+			return;
+		}
+
+		Log(LogInformation, "HttpServerConnection") << "Starting Peek.";
+		// Test to see if this makes a difference on alpine
+		char c;
+		m_Stream->peek(boost::asio::mutable_buffer(&c, 1), ec);
+		if (ec) {
+			Log(LogInformation, "HttpServerConnection") << "Detected shutdown from client: " << m_PeerAddress << ". Peek ec: " << ec.message();
 			Disconnect(yc);
 			return;
 		}

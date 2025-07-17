@@ -105,6 +105,7 @@ cmake \
 
 ninja -v
 
-ninja test
+# ninja test
+ctest -V -R base-remote_http
 ninja install
 icinga2 daemon -C
