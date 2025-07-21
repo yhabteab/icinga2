@@ -25,7 +25,7 @@ env:
   # The variable ${{ github.repository }} is not suitable for container image names in our case because
   # they must be lowercase, and our organization name is Icinga.
   # Since our repository names are already lowercase, no additional modifications are necessary.
-  IMAGE_NAME: icinga/${{ github.event.repository.name }}
+  IMAGE_NAME: ${{ github.repository }}
 
   # The LATEST variable determines if the current release tag is the greatest tag overall.
   # If true, the container image will be tagged as 'latest' when pushed to the container registries.
