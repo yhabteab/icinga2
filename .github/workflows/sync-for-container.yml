@@ -1,0 +1,25 @@
+name: Sync For-Container.md to Docker Hub
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      # Trigger the workflow only if the For-Container.md file is changed.
+      - doc/02-installation.md.d/For-Container.md
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync For-Container.md
+        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: icinga/icinga2
+          readme-filepath: ./doc/02-installation.md.d/For-Container.md
