@@ -1,0 +1,16 @@
+name: Sync For-Container.md to Docker Hub
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      # Trigger the workflow only if the For-Container.md file is changed.
+      - doc/02-installation.md.d/For-Container.md
+
+jobs:
+  sync:
+    uses: icinga/github-actions/.github/workflows/sync-for-container.yml@main
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
