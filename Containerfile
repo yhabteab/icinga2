@@ -122,7 +122,8 @@ RUN --mount=type=bind,source=.,target=/icinga2,readonly \
         -DCMAKE_INSTALL_LOCALSTATEDIR=/data/var \
         -DICINGA2_SYSCONFIGFILE=/etc/sysconfig/icinga2 \
         -DICINGA2_RUNDIR=/run \
-        -DICINGA2_WITH_{COMPAT,LIVESTATUS}=OFF && \
+        -DICINGA2_WITH_COMPAT=OFF \
+        -DICINGA2_WITH_LIVESTATUS=OFF && \
     make -j$([ "$MAKE_JOBS" = auto ] && nproc || echo "$MAKE_JOBS") && \
     CTEST_OUTPUT_ON_FAILURE=1 make test && \
     make install DESTDIR=/icinga2-install
@@ -216,8 +217,7 @@ RUN /usr/lib/icinga2/prepare-dirs /etc/sysconfig/icinga2
 # they will be able to do so without any issues.
 VOLUME ["/data"]
 
-COPY tools/container/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY --chmod=0755 tools/container/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/bin/dumb-init", "-c", "--", "/usr/local/bin/entrypoint.sh"]
 
 EXPOSE 5665
