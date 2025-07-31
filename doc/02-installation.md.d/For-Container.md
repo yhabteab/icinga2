@@ -42,7 +42,7 @@ the `icinga2 node wizard` command to set up the containers interactively.
 
 ```
 docker run --rm -it \
-    --network icinga \
+	--network icinga \
 	--hostname icinga-master \
 	--volume icinga-master:/data \
 	icinga/icinga2 icinga2 node wizard
