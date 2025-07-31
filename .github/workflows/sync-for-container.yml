@@ -10,7 +10,9 @@ on:
 
 jobs:
   sync:
-    uses: icinga/github-actions/.github/workflows/sync-for-container.yml@main
+    uses: icinga/github-actions/.github/workflows/sync-for-container.yml@sync-image-readme-md
+    with:
+      repository: ${{ github.repository }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
