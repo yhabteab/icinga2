@@ -24,9 +24,10 @@ jobs:
       id-token: write
 
     name: Container Image
-    uses: icinga/github-actions/.github/workflows/container-image.yml@main
+    uses: icinga/github-actions/.github/workflows/container-image.yml@sync-image-readme-md
     with:
       documentation_url: https://icinga.com/docs/icinga2
+      image_name: ${{ github.repository }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
