@@ -71,7 +71,7 @@ private:
  * @ingroup base
  */
 template <typename T>
-using AtomicOrLocked = typename std::conditional<std::is_trivially_copyable<T>::value, std::atomic<T>, Locked<T>>::type;
+using AtomicOrLocked = std::conditional_t<std::is_trivially_copyable_v<T>, std::atomic<T>, Locked<T>>;
 
 }
 
