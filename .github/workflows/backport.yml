@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout HEAD
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Create Backport Pull Request
         uses: korthout/backport-action@v3
