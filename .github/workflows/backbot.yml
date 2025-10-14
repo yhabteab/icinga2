@@ -25,3 +25,4 @@ jobs:
         with:
           github_token: ${{ github.token }}
           copy_labels_pattern: '^[^c]+[^l]+[^a]+[^-]+[^s]+[^i]+[^g]+[^n]+[^e][^d]+' # copy all labels other than the cla-signed label
+          conflict_handling: 'draft' # create a draft pull request if there are conflicts
