@@ -1,0 +1,22 @@
+name: Backbot
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  backbot:
+    runs-on: ubuntu-latest
+
+    # Permissions required for the job to be able to create branches and pull requests.
+    permissions:
+      contents: write
+      pull-requests: write
+
+    # Never run this job for unmerged pull requests.
+    if: ${{ github.event.pull_request.merged == true }}
+    steps:
+      - name: Run Backbot
+        uses: yhabteab/backbot@main
+        with:
+          github_token: ${{ github.token }}
+          copy_labels_pattern: '^[^c]+[^l]+[^a]+[^-]+[^s]+[^i]+[^g]+[^n]+[^e][^d]+' # copy all labels other than the cla-signed label
