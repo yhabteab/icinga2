@@ -15,6 +15,11 @@ jobs:
     # Never run this job for unmerged pull requests.
     if: ${{ github.event.pull_request.merged == true }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+
       - name: Run Backbot
         uses: yhabteab/backbot@main
         with:
