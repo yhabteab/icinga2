@@ -7,15 +7,6 @@ export CTEST_OUTPUT_ON_FAILURE=1
 CMAKE_OPTS=()
 
 case "$DISTRO" in
-  alpine:*)
-    # Packages inspired by the Alpine package, just
-    # - LibreSSL instead of OpenSSL 3 and
-    # - no MariaDB or libpq as they depend on OpenSSL.
-    # https://gitlab.alpinelinux.org/alpine/aports/-/blob/master/community/icinga2/APKBUILD
-    apk add bison boost-dev ccache cmake flex g++ libedit-dev libressl-dev ninja-build tzdata
-    ln -vs /usr/lib/ninja-build/bin/ninja /usr/local/bin/ninja
-    ;;
-
   amazonlinux:2)
     amazon-linux-extras install -y epel
     yum install -y bison ccache cmake3 gcc-c++ flex ninja-build system-rpm-config \
