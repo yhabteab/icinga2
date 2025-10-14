@@ -6,6 +6,9 @@ on:
       - master
       - 'support/*'
   pull_request: {}
+  repository_dispatch:
+    types:
+      - pull_request_created_by_backbot
 
 concurrency:
   group: linux-${{ github.event_name == 'push' && github.sha || github.ref }}
