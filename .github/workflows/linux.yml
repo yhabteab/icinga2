@@ -3,8 +3,7 @@ name: Linux
 on:
   push:
     branches:
-      - master
-      - 'support/*'
+      - masters
   pull_request: {}
 
 concurrency:
