@@ -3,8 +3,7 @@ name: Container Image
 on:
   push:
     branches:
-      - master
-  pull_request: {}
+      - masters
   release:
     types:
       - published
